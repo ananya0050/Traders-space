@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STOCK SCREENER</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #007BFF;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            width: 250px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            overflow-x: auto;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filters label {
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>STOCK SCREENER</h1>
+        <!-- Filters -->
+        <div class="filters">
+            <div>
+                <label for="companySelect">Select Company:</label>
+                <select id="companySelect">
+                    <option value="">--Select Company--</option>
+                </select>
+            </div>
+            <div>
+                <label for="stockPriceSelect">Select Stock Price Range:</label>
+                <select id="stockPriceSelect">
+                    <option value="">--Select Stock Price Range--</option>
+                    <option value="300-1000">300-1000</option>
+                    <option value="1000-1700">1000-1700</option>
+                    <option value="1700-2400">1700-2400</option>
+                    <option value="2400-3100">2400-3100</option>
+                    <option value="3100-3800">3100-3800</option>
+                    <option value="3800-4500">3800-4500</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Company Table -->
+        <table id="companyTable">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Stock Price</th>
+                    <th>Market Cap</th>
+                    <th>Sector</th>
+                    <th>Earnings per Share</th>
+                    <th>Price Earning Ratio</th>
+                    <th>Turnover (2023-2024)</th>
+                    <th>Profit After Tax</th>
+                    <th>Price to Book Ratio</th>
+                    <th>Dividend Yield (%)</th>
+                </tr>
+            </thead>
+            <tbody id="companyData"></tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        &copy; 2024 Company Financials Dashboard. All Rights Reserved.
+    </div>
+
+    <script>
+        
+        fetch('/COMPANY_FINANCIALS.company') 
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('companyData');
+                const companySelect = document.getElementById('companySelect');
+
+                data.forEach(company => {
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${company.COMPANY}</td>
+                        <td>${company.STOCK_PRICE}</td>
+                        <td>${company.MARKET_CAP}</td>
+                        <td>${company.SECTOR}</td>
+                        <td>${company.EARNINGS_PER_SHARE}</td>
+                        <td>${company.PRICE_EARNING_RATIO}</td>
+                        <td>${company.TURNOVER_2023_2024}</td>
+                        <td>${company.PROFIT_AFTER_TAX}</td>
+                        <td>${company.PRICE_BOOK_RATIO}</td>
+                        <td>${company.DIVIDEND_YIELD_PERCENT}</td>
+                    `;
+                    tableBody.appendChild(row);
+
+                    const companyOption = document.createElement('option');
+                    companyOption.value = company.COMPANY;
+                    companyOption.textContent = company.COMPANY;
+                    companySelect.appendChild(companyOption);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+        // Event listener for filtering by company
+        document.getElementById('companySelect').addEventListener('change', function() {
+            const selectedCompany = this.value;
+            const rows = document.querySelectorAll('#companyData tr');
+            rows.forEach(row => {
+                const companyCell = row.cells[0];
+                if (companyCell && companyCell.textContent !== selectedCompany && selectedCompany !== '') {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        });
+
+        // Event listener for filtering by stock price range
+        document.getElementById('stockPriceSelect').addEventListener('change', function() {
+            const selectedRange = this.value;
+            const [min, max] = selectedRange.split('-').map(Number);
+            const rows = document.querySelectorAll('#companyData tr');
+            rows.forEach(row => {
+                const stockPriceCell = row.cells[1];
+                const stockPrice = parseFloat(stockPriceCell.textContent);
+                if (
+                    stockPrice &&
+                    (stockPrice < min || stockPrice > max) &&
+                    selectedRange !== ''
+                ) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
