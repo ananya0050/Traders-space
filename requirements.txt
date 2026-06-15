@@ -1,9 +1,7 @@
-streamlit==1.58.0
-tensorflow==2.15.1
-numpy==1.26.4
-pandas==2.2.3
-yfinance==0.2.65
-plotly==5.24.1
-matplotlib==3.9.4
-scikit-learn==1.6.1
-h5py==3.10.0
+streamlit
+tensorflow==2.20.0
+pandas
+yfinance
+plotly
+matplotlib
+scikit-learn
