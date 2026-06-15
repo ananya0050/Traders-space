@@ -5,5 +5,4 @@ numpy<2.2
 pandas
 yfinance
 plotly
-matplotlib
 scikit-learn
