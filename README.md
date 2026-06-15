@@ -41,13 +41,12 @@ app.py
 The deployment uses these files:
 
 - `requirements.txt` installs Python packages on the cloud server.
-- Streamlit Community Cloud lets you choose the Python version from the deployment Advanced settings.
 - `.streamlit/config.toml` sets Streamlit server options for cloud hosting.
 - `Stock Predictions Model.keras` is the saved model loaded by `app.py`.
 
 ## Troubleshooting
 
-If deployment fails with `No matching distribution found for tensorflow`, the host is using a Python version that the selected TensorFlow release does not support. Streamlit Community Cloud defaults to Python 3.12, and this project uses a TensorFlow release with Python 3.12/3.13 wheels.
+If deployment fails with `No matching distribution found for tensorflow`, set the Python version in Streamlit Community Cloud's Advanced settings to Python 3.12. Streamlit Community Cloud defaults to Python 3.12, and this project uses a TensorFlow release with Python 3.12 Linux wheels.
 
 ## Important notes
 

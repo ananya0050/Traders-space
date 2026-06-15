@@ -1,5 +1,6 @@
 streamlit
-tensorflow==2.20.0
+tensorflow==2.19.1
+numpy<2.2
 pandas
 yfinance
 plotly
