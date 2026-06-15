@@ -1,5 +1,6 @@
 streamlit
-tensorflow==2.19.1
+keras
+torch
 numpy<2.2
 pandas
 yfinance

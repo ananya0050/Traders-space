@@ -1,4 +1,7 @@
 from pathlib import Path
+import os
+
+os.environ["KERAS_BACKEND"] = "torch"
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,7 +11,7 @@ import streamlit as st
 import yfinance as yf
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 
 MODEL_PATH = Path(__file__).with_name("Stock Predictions Model.keras")
