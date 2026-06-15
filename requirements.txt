@@ -4,5 +4,4 @@ torch
 numpy<2.2
 pandas
 yfinance
-plotly
 scikit-learn

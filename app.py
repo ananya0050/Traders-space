@@ -5,7 +5,6 @@ os.environ["KERAS_BACKEND"] = "torch"
 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -94,56 +93,14 @@ col3.metric("R2", f"{r2:.4f}")
 mape = calculate_mape(y_actual, predicted_prices)
 st.metric("MAPE", f"{mape:.4f}%")
 
-st.subheader("Original Price vs Predicted Price")
-fig = go.Figure()
-fig.add_trace(
-    go.Scatter(
-        y=y_actual.flatten(),
-        mode="lines",
-        name="Actual Price",
-        line=dict(color="green"),
-    )
+st.subheader("Actual vs Predicted Price Data")
+comparison = pd.DataFrame(
+    {
+        "Actual Price": y_actual.flatten(),
+        "Predicted Price": predicted_prices.flatten(),
+    }
 )
-fig.add_trace(
-    go.Scatter(
-        y=predicted_prices.flatten(),
-        mode="lines",
-        name="Predicted Price",
-        line=dict(color="red"),
-    )
-)
-fig.update_layout(
-    title=f"{stock} Price Prediction vs Actual",
-    xaxis_title="Time",
-    yaxis_title="Price",
-)
-st.plotly_chart(fig, use_container_width=True)
-
-st.subheader("Moving Averages")
-
-ma_50_days = data["Close"].rolling(50).mean()
-ma_100_days = data["Close"].rolling(100).mean()
-ma_200_days = data["Close"].rolling(200).mean()
-
-fig1 = go.Figure()
-fig1.add_trace(go.Scatter(y=data["Close"], mode="lines", name="Price", line=dict(color="green")))
-fig1.add_trace(go.Scatter(y=ma_50_days, mode="lines", name="MA 50", line=dict(color="red")))
-fig1.update_layout(title=f"{stock} Price vs MA50", xaxis_title="Time", yaxis_title="Price")
-st.plotly_chart(fig1, use_container_width=True)
-
-fig2 = go.Figure()
-fig2.add_trace(go.Scatter(y=data["Close"], mode="lines", name="Price", line=dict(color="green")))
-fig2.add_trace(go.Scatter(y=ma_50_days, mode="lines", name="MA 50", line=dict(color="red")))
-fig2.add_trace(go.Scatter(y=ma_100_days, mode="lines", name="MA 100", line=dict(color="blue")))
-fig2.update_layout(title=f"{stock} Price vs MA50 vs MA100", xaxis_title="Time", yaxis_title="Price")
-st.plotly_chart(fig2, use_container_width=True)
-
-fig3 = go.Figure()
-fig3.add_trace(go.Scatter(y=data["Close"], mode="lines", name="Price", line=dict(color="green")))
-fig3.add_trace(go.Scatter(y=ma_100_days, mode="lines", name="MA 100", line=dict(color="red")))
-fig3.add_trace(go.Scatter(y=ma_200_days, mode="lines", name="MA 200", line=dict(color="blue")))
-fig3.update_layout(title=f"{stock} Price vs MA100 vs MA200", xaxis_title="Time", yaxis_title="Price")
-st.plotly_chart(fig3, use_container_width=True)
+st.dataframe(comparison, use_container_width=True)
 
 st.subheader("Model Accuracy & Comparison")
 with st.expander("View Metric Details"):
