@@ -3,5 +3,3 @@ keras
 torch
 numpy<2.2
 pandas
-yfinance
-scikit-learn

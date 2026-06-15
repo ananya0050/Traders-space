@@ -1,14 +1,14 @@
 from pathlib import Path
 import os
+from urllib.error import URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 os.environ["KERAS_BACKEND"] = "torch"
 
 import numpy as np
 import pandas as pd
 import streamlit as st
-import yfinance as yf
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.preprocessing import MinMaxScaler
 from keras.models import load_model
 
 
@@ -22,6 +22,48 @@ def get_model():
 
 def calculate_mape(actual, predicted):
     return np.mean(np.abs((actual - predicted) / actual)) * 100
+
+
+def calculate_r2(actual, predicted):
+    residual_sum = np.sum((actual - predicted) ** 2)
+    total_sum = np.sum((actual - np.mean(actual)) ** 2)
+    return 1 - residual_sum / total_sum if total_sum != 0 else 0
+
+
+def scale_values(values, data_min, data_max):
+    return (values - data_min) / (data_max - data_min)
+
+
+def inverse_scale_values(values, data_min, data_max):
+    return values * (data_max - data_min) + data_min
+
+
+def stooq_symbol(symbol):
+    symbol = symbol.strip().lower()
+    if "." in symbol:
+        return symbol
+    return f"{symbol}.us"
+
+
+@st.cache_data(ttl=3600)
+def download_stock_data(symbol, start, end):
+    params = {
+        "s": stooq_symbol(symbol),
+        "d1": pd.Timestamp(start).strftime("%Y%m%d"),
+        "d2": pd.Timestamp(end).strftime("%Y%m%d"),
+        "i": "d",
+    }
+    url = f"https://stooq.com/q/d/l/?{urlencode(params)}"
+    request = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+
+    with urlopen(request, timeout=20) as response:
+        data = pd.read_csv(response)
+
+    if data.empty or "Close" not in data.columns:
+        return pd.DataFrame()
+
+    data["Date"] = pd.to_datetime(data["Date"])
+    return data.set_index("Date").sort_index()
 
 
 st.set_page_config(page_title="Stock Market Predictor", layout="wide")
@@ -41,7 +83,11 @@ if start >= end:
 
 st.subheader("Stock Data")
 with st.spinner("Loading stock data..."):
-    data = yf.download(stock, start=start, end=end, progress=False)
+    try:
+        data = download_stock_data(stock, start, end)
+    except (URLError, TimeoutError, ValueError) as error:
+        st.error(f"Unable to download stock data: {error}")
+        st.stop()
 
 if data.empty:
     st.error("No data found for the given stock symbol and date range.")
@@ -53,15 +99,21 @@ if len(data) < 120:
 
 st.write(data)
 
-data_train = pd.DataFrame(data["Close"][0 : int(len(data) * 0.80)])
-data_test = pd.DataFrame(data["Close"][int(len(data) * 0.80) :])
+data_train = pd.DataFrame(data["Close"].iloc[0 : int(len(data) * 0.80)])
+data_test = pd.DataFrame(data["Close"].iloc[int(len(data) * 0.80) :])
 
-scaler = MinMaxScaler(feature_range=(0, 1))
-data_train_scaled = scaler.fit_transform(data_train)
+data_min = data_train["Close"].min()
+data_max = data_train["Close"].max()
+
+if data_max == data_min:
+    st.error("The selected stock data does not have enough price variation for prediction.")
+    st.stop()
+
+data_train_scaled = scale_values(data_train[["Close"]].to_numpy(dtype=float), data_min, data_max)
 
 past_100_days = data_train.tail(100)
 data_test = pd.concat([past_100_days, data_test], ignore_index=True)
-data_test_scaled = scaler.transform(data_test)
+data_test_scaled = scale_values(data_test[["Close"]].to_numpy(dtype=float), data_min, data_max)
 
 x_train, y_train = [], []
 for i in range(100, data_train_scaled.shape[0]):
@@ -77,14 +129,14 @@ x_test, y_test = np.array(x_test), np.array(y_test)
 
 with st.spinner("Predicting stock prices..."):
     predicted_prices = model.predict(x_test)
-predicted_prices = scaler.inverse_transform(predicted_prices)
-y_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+predicted_prices = inverse_scale_values(predicted_prices, data_min, data_max)
+y_actual = inverse_scale_values(y_test.reshape(-1, 1), data_min, data_max)
 
 st.markdown("### Model Accuracy Metrics")
 col1, col2, col3 = st.columns(3)
-mae = mean_absolute_error(y_actual, predicted_prices)
-mse = mean_squared_error(y_actual, predicted_prices)
-r2 = r2_score(y_actual, predicted_prices)
+mae = np.mean(np.abs(y_actual - predicted_prices))
+mse = np.mean((y_actual - predicted_prices) ** 2)
+r2 = calculate_r2(y_actual, predicted_prices)
 
 col1.metric("MAE", f"{mae:.4f}")
 col2.metric("MSE", f"{mse:.4f}")
