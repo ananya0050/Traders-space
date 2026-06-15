@@ -1,13 +1,13 @@
 const express = require('express');
 const mysql = require('mysql2');
 const app = express();
-const port = 3002;
+const port = process.env.PORT || 3002;
 app.use(express.static('public'));
 const connection = mysql.createConnection({
-  host: 'localhost',
-  database: 'COMPANY_FINANCIALS',
-  user: 'root',
-  password: 'dps#1234',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'COMPANY_FINANCIALS',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
 });
 connection.connect((err) => {
   if (err) {

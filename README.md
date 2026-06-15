@@ -1,33 +1,52 @@
-# stock-predictor-project
-<!-- <img width="1874" height="905" alt="image" src="https://github.com/user-attachments/assets/c55ea0b3-680c-4189-b458-07d69fe373b2" /> -->
+# Traders Space - Stock Predictor
 
-<!-- <img width="1874" height="905" alt="image" src="https://raw.github.com/user-attachments/assets/fefc6c65-92c5-4fdf-83ee-c7bfa661fecd" /> -->
-<!-- <p align="center">
-  <img src="https://github.com/user-attachments/assets/fefc6c65-92c5-4fdf-83ee-c7bfa661fecd" width="600">
-</p> -->
-<video src="https://github.com/user-attachments/assets/fefc6c65-92c5-4fdf-83ee-c7bfa661fecd" controls width="600">
-</video>
+A Streamlit app that loads a trained LSTM model, fetches stock data with Yahoo Finance, and compares actual prices with predicted prices.
 
-LIVE DEMO💥
+## Features
 
-✨ HIGHLIGHTS
+- Historical stock data download by ticker and date range.
+- LSTM-based price prediction using the saved Keras model.
+- Model metrics: MAE, MSE, R2, and MAPE.
+- Interactive Plotly chart for actual vs predicted prices.
+- Moving-average charts for 50, 100, and 200 day windows.
 
+## Local setup
 
+1. Create and activate a virtual environment.
+2. Install dependencies:
 
-📈 Historical Stock Data Analysis — Collects and processes historical stock price data for model training.
+```bash
+pip install -r requirements.txt
+```
 
-🤖 Machine Learning Prediction — Uses predictive models (LSTM) to forecast future stock prices.
+3. Run the app:
 
-🔄 Real-Time Price Fetching — Fetches recent stock data to make updated predictions.
+```bash
+streamlit run app.py
+```
 
-📊 Interactive Web Interface — Web app (built with Express, Streamlit )
+## Deploy from GitHub to Streamlit Community Cloud
 
-💡 Graphical Visualizations — Displays historical trends, prediction vs actual charts.
+1. Push this folder to a GitHub repository.
+2. Go to Streamlit Community Cloud and create a new app.
+3. Select your GitHub repository.
+4. Set the main file path to:
 
-🔧 Model Evaluation & Error Metrics — Calculates performance metrics like MAE, RMSE, or other error metrics to measure prediction quality.
+```text
+app.py
+```
 
-📦 Lightweight & Scalable Architecture — Built using Python + app.py with minimal dependencies for easy deployment.
+5. Deploy.
 
-🧪 Modular Codebase — Clean separation: data fetching, preprocessing, model training, and prediction logic.
+The deployment uses these files:
 
-🔍 Flexible for Extension — Designed so you can plug in new ML models or data sources in the future
+- `requirements.txt` installs Python packages on the cloud server.
+- `runtime.txt` asks the host to use Python 3.11.
+- `.streamlit/config.toml` sets Streamlit server options for cloud hosting.
+- `Stock Predictions Model.keras` is the saved model loaded by `app.py`.
+
+## Important notes
+
+- GitHub Pages cannot run this Streamlit/Python app. Use Streamlit Community Cloud, Render, Railway, or another Python app host.
+- Do not commit private API keys, database passwords, or `.streamlit/secrets.toml`.
+- `server.js`, `index.html`, `news.html`, and `project1.html` are legacy/static files and are not required for the Streamlit deployment.

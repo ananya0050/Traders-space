@@ -142,9 +142,13 @@
 
 <script>
   
-  apiurl='https://newsapi.org/v2/top-headlines?country=in&category=business&apiKey=15c180e4071c414b94c2ba8e80c23153';
+  const apiUrl = '';
     async function fetchNews() {
     try {
+      if (!apiUrl) {
+        console.warn('Add your News API URL locally before running this page.');
+        return;
+      }
       const response = await fetch(apiUrl);
       const data = await response.json();
       const carousel = document.getElementById('carousel');

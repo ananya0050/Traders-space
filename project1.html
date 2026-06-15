@@ -167,7 +167,12 @@
         const carousel = document.getElementById('carousel');
         
         // Fetch stock news from an API
-        fetch('https://finnhub.io/api/v1/news?category=general&token=ct6pbipr01qmbqosemd0ct6pbipr01qmbqosemdg')
+        const finnhubNewsUrl = '';
+        if (!finnhubNewsUrl) {
+            console.warn('Add your Finnhub news URL locally before running this page.');
+        }
+        if (finnhubNewsUrl) {
+        fetch(finnhubNewsUrl)
 
             .then(response => response.json())
             .then(newsData => {
@@ -190,6 +195,7 @@
                 });
             })
             .catch(error => console.error('Error fetching stock news:', error));
+        }
 
         // Carousel movement function
         function moveCarousel(direction) {
